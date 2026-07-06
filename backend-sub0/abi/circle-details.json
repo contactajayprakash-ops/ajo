@@ -1,0 +1,25 @@
+{
+  "id": "ajo-circle-details-01",
+  "resource": "circle-details",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "encryption_key": "$ENV.JWT_SECRET_KEY"
+  },
+  "protected": {
+    "provide_as": "x-access-token",
+    "extract_claims": ["id"]
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "SELECT c.id, c.name, c.description, c.creator_id, c.contribution_amount, c.currency, c.frequency, c.seats, c.pot_balance, c.current_cycle, c.status, c.invite_code FROM circles c JOIN memberships m ON m.circle_id = c.id WHERE c.id = $1 AND m.user_id = $2 AND c.deleted_at IS NULL",
+        "parameters": ["$PAYLOAD.circle_id", "$PROTECTED.id"]
+      },
+      "must_return_value": true,
+      "returnables": ["id", "name", "description", "creator_id", "contribution_amount", "currency", "frequency", "seats", "pot_balance", "current_cycle", "status", "invite_code"]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "ajo-my-circles-01",
+  "resource": "my-circles",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "encryption_key": "$ENV.JWT_SECRET_KEY"
+  },
+  "protected": {
+    "provide_as": "x-access-token",
+    "extract_claims": ["id"]
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "SELECT c.id, c.name, c.description, c.contribution_amount, c.currency, c.frequency, c.seats, c.pot_balance, c.current_cycle, c.status, c.invite_code, m.payout_position, m.has_been_paid::int AS has_been_paid, m.role FROM circles c JOIN memberships m ON m.circle_id = c.id WHERE m.user_id = $1 AND c.deleted_at IS NULL ORDER BY c.updated_at DESC",
+        "parameters": ["$PROTECTED.id"]
+      },
+      "returnables": ["id", "name", "description", "contribution_amount", "currency", "frequency", "seats", "pot_balance", "current_cycle", "status", "invite_code", "payout_position", "has_been_paid", "role"]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "ajo-trigger-payout-01",
+  "resource": "trigger-payout",
+  "tokenize": { "type": "JWT", "algorithm": "HS256", "encryption_key": "$ENV.JWT_SECRET_KEY" },
+  "protected": { "provide_as": "x-access-token", "extract_claims": ["id"] },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "WITH recip AS (SELECT u.id AS rid, u.name AS rname, c.pot_balance AS amt, c.current_cycle AS cyc, c.seats AS seats FROM circles c JOIN memberships m ON m.circle_id = c.id AND m.payout_position = c.current_cycle JOIN users u ON u.id = m.user_id WHERE c.id = $1 AND c.creator_id = $2 AND c.status = 'active' AND c.deleted_at IS NULL), ins_pay AS (INSERT INTO payouts (id, circle_id, user_id, cycle, amount, created_at) SELECT gen_random_uuid()::text, $1, rid, cyc, amt, $3::timestamptz FROM recip), mark AS (UPDATE memberships SET has_been_paid = true, updated_at = $3::timestamptz WHERE circle_id = $1 AND payout_position = (SELECT cyc FROM recip)), act AS (INSERT INTO activities (id, circle_id, user_id, actor_name, type, message, amount, created_at) SELECT gen_random_uuid()::text, $1, rid, rname, 'payout', 'collected the full pot', amt, $3::timestamptz FROM recip), upd AS (UPDATE circles SET pot_balance = 0, current_cycle = current_cycle + 1, status = CASE WHEN current_cycle >= seats THEN 'completed' ELSE 'active' END, updated_at = $3::timestamptz WHERE id = $1 AND EXISTS (SELECT 1 FROM recip) RETURNING id, name, pot_balance, current_cycle, status, seats) SELECT upd.id AS circle_id, upd.name, upd.pot_balance::text AS pot_balance, upd.current_cycle, upd.status, upd.seats, recip.rname AS recipient_name, recip.amt::text AS amount FROM upd, recip",
+        "parameters": ["$PAYLOAD.circle_id", "$PROTECTED.id", "$DATETIME"]
+      },
+      "must_return_value": true,
+      "main_returnable": true,
+      "returnables": ["circle_id", "name", "pot_balance", "current_cycle", "status", "seats", "recipient_name", "amount"],
+      "broadcast_websocket_message": { "broadcast_type": "ALL", "action": "payout_made" }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": {
+    "type": "String",
+    "primary_key": true,
+    "max_length": 255
+  },
+  "circle_id": {
+    "type": "String",
+    "indexable": true,
+    "foreign_key": {
+      "of": "_circle",
+      "key": "id"
+    }
+  },
+  "user_id": {
+    "type": "String",
+    "optional": true,
+    "foreign_key": {
+      "of": "_user",
+      "key": "id"
+    }
+  },
+  "actor_name": {
+    "type": "String",
+    "max_length": 255,
+    "optional": true
+  },
+  "type": {
+    "type": "String",
+    "max_length": 32
+  },
+  "message": {
+    "type": "String",
+    "max_length": 500
+  },
+  "amount": {
+    "type": "Float",
+    "optional": true
+  },
+  "created_at": {
+    "type": "DateTime"
+  }
+}

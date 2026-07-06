@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ajo — save together, collect in turns</title>
+  <meta name="description" content="A digital ajo (esusu, susu) savings circle. Fixed contributions, one pot, everyone watches it grow live.">
+  <meta name="theme-color" content="#191114">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23e2b457'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23191114'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <!-- Points the app at the deployed Sub0 backend. Change these if you redeploy. -->
+  <script>
+    window.__AJO_CONFIG__ = {
+      API_BASE: "https://us-east-ajofwwsxnk-m1.lingoql.com",
+      WS_URL: "wss://us-east-ajofwwsxnk-m1.lingoql.com/ws"
+    };
+  </script>
+</head>
+<body>
+  <noscript>
+    <div style="max-width:32rem;margin:4rem auto;padding:0 1.5rem;font-family:Georgia,serif;color:#f0e7d8;">
+      <h1>Ajo</h1>
+      <p>Ajo is a live savings-circle app and needs JavaScript turned on to run.
+      Nothing here works without it — the whole point is watching the pot move in real time.</p>
+    </div>
+  </noscript>
+  <div id="app"></div>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

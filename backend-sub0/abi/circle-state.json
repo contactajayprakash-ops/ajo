@@ -1,0 +1,24 @@
+{
+  "id": "ajo-circle-state-01",
+  "resource": "circle-state",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "encryption_key": "$ENV.JWT_SECRET_KEY"
+  },
+  "protected": {
+    "provide_as": "x-access-token",
+    "extract_claims": ["id"]
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "SELECT id AS circle_id, name, pot_balance, current_cycle, status, seats FROM circles WHERE id = $1 AND deleted_at IS NULL",
+        "parameters": ["$PAYLOAD.circle_id"]
+      },
+      "returnables": ["circle_id", "name", "pot_balance", "current_cycle", "status", "seats"]
+    }
+  ]
+}

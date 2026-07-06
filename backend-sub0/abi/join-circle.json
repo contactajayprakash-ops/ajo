@@ -1,0 +1,58 @@
+{
+  "id": "ajo-join-circle-01",
+  "resource": "join-circle",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "encryption_key": "$ENV.JWT_SECRET_KEY"
+  },
+  "protected": {
+    "provide_as": "x-access-token",
+    "extract_claims": ["id", "name"]
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "payload_validation": [
+        { "field": { "invite_code": { "type": "STRING" } }, "min_length": 4, "max_length": 32 }
+      ],
+      "sql_query": {
+        "query": "SELECT id, name, contribution_amount, currency, seats, status FROM circles WHERE invite_code = $1 AND deleted_at IS NULL",
+        "parameters": ["$PAYLOAD.invite_code"]
+      },
+      "must_return_value": true,
+      "main_returnable": true,
+      "returnables": ["id", "name", "contribution_amount", "currency", "seats", "status"]
+    },
+    {
+      "id": 2,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "INSERT INTO memberships (id, circle_id, user_id, payout_position, has_been_paid, role, created_at, updated_at) SELECT $1, c.id, $2, COALESCE((SELECT MAX(payout_position) FROM memberships WHERE circle_id = c.id), 0) + 1, false, 'member', $3::timestamptz, $4::timestamptz FROM circles c WHERE c.invite_code = $5",
+        "parameters": ["$GENERATOR.KSUID", "$PROTECTED.id", "$DATETIME", "$DATETIME", "$PAYLOAD.invite_code"]
+      }
+    },
+    {
+      "id": 3,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "INSERT INTO activities (id, circle_id, user_id, actor_name, type, message, created_at) SELECT $1, c.id, $2, $3, 'member_joined', $4, $5::timestamptz FROM circles c WHERE c.invite_code = $6",
+        "parameters": ["$GENERATOR.KSUID", "$PROTECTED.id", "$PROTECTED.name", "joined the circle", "$DATETIME", "$PAYLOAD.invite_code"]
+      }
+    },
+    {
+      "id": 4,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "SELECT id AS circle_id, name, pot_balance, current_cycle, status FROM circles WHERE invite_code = $1",
+        "parameters": ["$PAYLOAD.invite_code"]
+      },
+      "returnables": ["circle_id", "name", "pot_balance", "current_cycle", "status"],
+      "broadcast_websocket_message": {
+        "broadcast_type": "ALL",
+        "action": "member_joined"
+      }
+    }
+  ]
+}

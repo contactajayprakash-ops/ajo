@@ -1,0 +1,24 @@
+{
+  "id": "ajo-circle-feed-01",
+  "resource": "circle-feed",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "encryption_key": "$ENV.JWT_SECRET_KEY"
+  },
+  "protected": {
+    "provide_as": "x-access-token",
+    "extract_claims": ["id"]
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "SELECT id, actor_name, type, message, amount, created_at::text AS created_at FROM activities WHERE circle_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 40",
+        "parameters": ["$PAYLOAD.circle_id"]
+      },
+      "returnables": ["id", "actor_name", "type", "message", "amount", "created_at"]
+    }
+  ]
+}

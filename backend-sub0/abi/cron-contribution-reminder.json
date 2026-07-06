@@ -1,0 +1,18 @@
+{
+  "id": "ajo-cron-reminder-01",
+  "resource": "cron-contribution-reminder",
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "run_in_background": true,
+      "sql_query": {
+        "query": "INSERT INTO activities (id, circle_id, user_id, actor_name, type, message, created_at) SELECT gen_random_uuid()::text, c.id, NULL, 'Ajo', 'reminder', 'This cycle''s pot is still filling. Drop your contribution to keep the circle on track.', $1::timestamptz FROM circles c WHERE c.status = 'active' AND c.deleted_at IS NULL AND (SELECT COUNT(*) FROM contributions ct WHERE ct.circle_id = c.id AND ct.cycle = c.current_cycle) < c.seats",
+        "parameters": ["$DATETIME"]
+      },
+      "cron_job": {
+        "execution_interval": "0 0 9 * * *"
+      }
+    }
+  ]
+}

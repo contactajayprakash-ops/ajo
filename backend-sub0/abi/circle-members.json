@@ -1,0 +1,24 @@
+{
+  "id": "ajo-circle-members-01",
+  "resource": "circle-members",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "encryption_key": "$ENV.JWT_SECRET_KEY"
+  },
+  "protected": {
+    "provide_as": "x-access-token",
+    "extract_claims": ["id"]
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "SELECT u.id AS user_id, u.name, u.reliability_score, m.payout_position, m.has_been_paid::int AS has_been_paid, m.role, (EXISTS(SELECT 1 FROM contributions ct WHERE ct.circle_id = m.circle_id AND ct.user_id = u.id AND ct.cycle = (SELECT current_cycle FROM circles WHERE id = m.circle_id) AND ct.deleted_at IS NULL))::int AS paid_this_cycle FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.circle_id = $1 AND m.deleted_at IS NULL ORDER BY m.payout_position ASC",
+        "parameters": ["$PAYLOAD.circle_id"]
+      },
+      "returnables": ["user_id", "name", "reliability_score", "payout_position", "has_been_paid", "role", "paid_this_cycle"]
+    }
+  ]
+}

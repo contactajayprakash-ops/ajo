@@ -1,0 +1,32 @@
+{
+  "id": {
+    "type": "String",
+    "primary_key": true,
+    "max_length": 255
+  },
+  "circle_id": {
+    "type": "String",
+    "indexable": true,
+    "foreign_key": {
+      "of": "_circle",
+      "key": "id"
+    }
+  },
+  "user_id": {
+    "type": "String",
+    "indexable": true,
+    "foreign_key": {
+      "of": "_user",
+      "key": "id"
+    }
+  },
+  "cycle": {
+    "type": "Number"
+  },
+  "amount": {
+    "type": "Float"
+  },
+  "created_at": {
+    "type": "DateTime"
+  }
+}

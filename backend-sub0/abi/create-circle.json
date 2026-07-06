@@ -1,0 +1,47 @@
+{
+  "id": "ajo-create-circle-01",
+  "resource": "create-circle",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "encryption_key": "$ENV.JWT_SECRET_KEY"
+  },
+  "protected": {
+    "provide_as": "x-access-token",
+    "extract_claims": ["id", "name"]
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "payload_validation": [
+        { "field": { "circle_id": { "type": "STRING" } }, "min_length": 8, "max_length": 255 },
+        { "field": { "name": { "type": "STRING" } }, "min_length": 2, "max_length": 255 },
+        { "field": { "contribution_amount": { "type": "NUMBER" } } },
+        { "field": { "seats": { "type": "NUMBER" } } }
+      ],
+      "sql_query": {
+        "query": "INSERT INTO circles (id, name, description, creator_id, contribution_amount, currency, frequency, seats, current_cycle, pot_balance, status, invite_code, created_at, updated_at) VALUES ($1, $2, $3, $4, $5::float8, $6, $7, $8::int, 1, 0, 'forming', $9, $10::timestamptz, $11::timestamptz) RETURNING id, name, description, contribution_amount, currency, frequency, seats, invite_code, pot_balance, current_cycle, status",
+        "parameters": ["$PAYLOAD.circle_id", "name", "description", "$PROTECTED.id", "contribution_amount", "currency", "frequency", "seats", "$GENERATOR.SHORTUUID", "$DATETIME", "$DATETIME"]
+      },
+      "main_returnable": true,
+      "returnables": ["id", "name", "description", "contribution_amount", "currency", "frequency", "seats", "invite_code", "pot_balance", "current_cycle", "status"]
+    },
+    {
+      "id": 2,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "INSERT INTO memberships (id, circle_id, user_id, payout_position, has_been_paid, role, created_at, updated_at) VALUES ($1, $2, $3, 1, false, 'admin', $4::timestamptz, $5::timestamptz)",
+        "parameters": ["$GENERATOR.KSUID", "$PAYLOAD.circle_id", "$PROTECTED.id", "$DATETIME", "$DATETIME"]
+      }
+    },
+    {
+      "id": 3,
+      "mode": "QUERY",
+      "sql_query": {
+        "query": "INSERT INTO activities (id, circle_id, user_id, actor_name, type, message, created_at) VALUES ($1, $2, $3, $4, 'circle_created', $5, $6::timestamptz)",
+        "parameters": ["$GENERATOR.KSUID", "$PAYLOAD.circle_id", "$PROTECTED.id", "$PROTECTED.name", "started the circle", "$DATETIME"]
+      }
+    }
+  ]
+}

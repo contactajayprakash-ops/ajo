@@ -1,0 +1,58 @@
+{
+  "id": "ajo-sign-up-01",
+  "resource": "sign-up",
+  "tokenize": {
+    "type": "JWT",
+    "algorithm": "HS256",
+    "expiration": 604800,
+    "encryption_key": "$ENV.JWT_SECRET_KEY",
+    "custom_claim_fields": ["id", "email", "name"],
+    "property_name": "token"
+  },
+  "actionables": [
+    {
+      "id": 1,
+      "mode": "QUERY",
+      "payload_validation": [
+        {
+          "field": { "name": { "type": "STRING" } },
+          "min_length": 2,
+          "max_length": 255
+        },
+        {
+          "field": { "email": { "type": "EMAIL" } },
+          "max_length": 255
+        },
+        {
+          "field": { "password": { "type": "STRING" } },
+          "min_length": 8,
+          "max_length": 255
+        }
+      ],
+      "hashables": [
+        {
+          "property": "password",
+          "algorithm": "BCRYPT",
+          "options": {
+            "rounds_cost": 12,
+            "salt": "$ENV.PASSWORD_SALT"
+          }
+        }
+      ],
+      "sql_query": {
+        "query": "INSERT INTO users (id, name, email, password, reliability_score, created_at, updated_at) VALUES ($1, $2, $3, $4, $5::float8, $6::timestamptz, $7::timestamptz) RETURNING id, name, email",
+        "parameters": [
+          "$GENERATOR.KSUID",
+          "name",
+          "email",
+          "password",
+          "100",
+          "$DATETIME",
+          "$DATETIME"
+        ],
+        "unique": ["email"]
+      },
+      "returnables": ["id", "name", "email", "token"]
+    }
+  ]
+}
