@@ -34,14 +34,11 @@ function appendKids(node, kids) {
 }
 
 const CURRENCY_SIGNS = {
-  NGN: "₦",
-  GHS: "GH₵",
-  KES: "KSh ",
-  ZAR: "R",
   USD: "$",
-  GBP: "£",
   EUR: "€",
-  XOF: "CFA ",
+  GBP: "£",
+  CAD: "CA$",
+  AUD: "A$",
 };
 
 export function money(amount, currency) {
