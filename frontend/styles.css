@@ -321,6 +321,59 @@ a { color: var(--indigo); }
 
 .auth-points strong { color: var(--bone); font-weight: 600; }
 
+.auth-eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--clay-bright);
+  font-weight: 600;
+  margin: 0.4rem 0 0;
+}
+
+.how-title {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 1.7rem 0 0.7rem;
+}
+
+.how-steps {
+  list-style: none;
+  counter-reset: step;
+  padding: 0;
+  margin: 0 0 1.7rem;
+  display: grid;
+  gap: 0.7rem;
+  max-width: 33rem;
+  color: var(--bone-dim);
+  font-size: 0.97rem;
+}
+
+.how-steps li {
+  counter-increment: step;
+  padding-left: 2.3rem;
+  position: relative;
+}
+
+.how-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -0.1rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold);
+  border: 1px solid rgba(226, 180, 87, 0.5);
+  border-radius: 50%;
+}
+
+.how-steps strong { color: var(--bone); font-weight: 600; }
+
 .auth-card {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -345,7 +398,14 @@ a { color: var(--indigo); }
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   font-weight: 700;
-  margin: 0.4rem 0 1.2rem;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.dash-sub {
+  color: var(--bone-dim);
+  font-size: 0.98rem;
+  max-width: 42rem;
+  margin: 0 0 1.2rem;
 }
 
 .dash-actions { display: flex; gap: 0.8rem; flex-wrap: wrap; }
