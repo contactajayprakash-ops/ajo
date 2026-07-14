@@ -92,16 +92,24 @@ export function renderAuth(root, { onLogin }) {
   const page = el("div", { class: "auth-page" },
     el("div", { class: "auth-pitch" },
       el("div", { class: "wordmark" }, "Ajo", el("span", { class: "wordmark-dot" }, ".")),
-      el("h1", { class: "auth-headline" }, "Save together.", el("br"), "Collect in turns."),
+      el("p", { class: "auth-eyebrow" }, "Group savings, made simple"),
+      el("h1", { class: "auth-headline" }, "Save as a group.", el("br"), "Take turns getting the pot."),
       el("p", { class: "auth-sub" },
-        "The savings circle you grew up with — ajo, esusu, susu — minus the notebook ",
-        "and the chasing. Everyone pays a fixed amount each cycle. One person collects ",
-        "the whole pot. Then it rotates."
+        "Ajo is a group savings app — a money pool for a few people who trust each other. ",
+        "Everyone puts in the same amount each week, and each week one member takes the ",
+        "whole pot. It rotates until everyone has had a turn. A simple, interest-free way ",
+        "to save for something big — no bank, no loan, no interest."
+      ),
+      el("p", { class: "how-title" }, "How it works"),
+      el("ol", { class: "how-steps" },
+        el("li", {}, el("strong", {}, "Start a circle."), " Pick the amount, how often, and how many people. Share the invite code."),
+        el("li", {}, el("strong", {}, "Everyone pays in."), " Each round, members contribute the same fixed amount and the pot fills up live."),
+        el("li", {}, el("strong", {}, "One person collects."), " The full pot goes to the next member in line — until everyone has been paid out once.")
       ),
       el("ul", { class: "auth-points" },
-        el("li", {}, el("strong", {}, "One pot, live."), " Watch it grow the second anyone pays in."),
-        el("li", {}, el("strong", {}, "A fair rotation."), " Positions are set when the circle starts; everyone collects once."),
-        el("li", {}, el("strong", {}, "Nothing hidden."), " Every contribution and payout lands in the circle feed, timestamped.")
+        el("li", {}, el("strong", {}, "Watch it live."), " The pot updates on everyone's screen the moment someone pays in."),
+        el("li", {}, el("strong", {}, "Fair by design."), " The payout order is locked when the circle starts; everyone collects exactly once."),
+        el("li", {}, el("strong", {}, "Fully transparent."), " Every payment and payout is logged with a timestamp. Nobody holds the cash.")
       )
     ),
     el("div", { class: "auth-card" }, form)
