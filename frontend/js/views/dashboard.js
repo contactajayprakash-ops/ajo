@@ -2,7 +2,7 @@ import { call, callList } from "../api.js";
 import { el, money } from "../ui.js";
 import { navigate } from "../router.js";
 
-const CURRENCIES = ["NGN", "GHS", "KES", "ZAR", "USD", "GBP", "EUR"];
+const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD"];
 
 function greeting(name) {
   const h = new Date().getHours();
@@ -32,6 +32,7 @@ export function renderDashboard(root, ctx) {
     ),
     el("section", { class: "dash-hero" },
       el("h1", { class: "dash-greeting" }, greeting(session.user.name)),
+      el("p", { class: "dash-sub" }, "A savings circle is a group money pool: everyone chips in the same amount each round, and members take turns collecting the whole pot. Start one below, or join a friend's with their invite code."),
       el("div", { class: "dash-actions" }, createBtn, joinBtn)
     ),
     panelHost,
@@ -56,16 +57,16 @@ export function renderDashboard(root, ctx) {
       el("p", { class: "panel-hint" }, "You'll get an invite code to share. The circle stays open until you start it."),
       el("div", { class: "field" },
         el("label", { for: "c-name" }, "Circle name"),
-        el("input", { id: "c-name", name: "name", required: true, maxlength: "60", placeholder: "Market women of Yaba" })
+        el("input", { id: "c-name", name: "name", required: true, maxlength: "60", placeholder: "Vacation fund" })
       ),
       el("div", { class: "field" },
         el("label", { for: "c-desc" }, "What's it for? (optional)"),
-        el("input", { id: "c-desc", name: "description", maxlength: "160", placeholder: "Rent, stock, school fees…" })
+        el("input", { id: "c-desc", name: "description", maxlength: "160", placeholder: "A trip, rent, holiday gifts…" })
       ),
       el("div", { class: "field-row" },
         el("div", { class: "field" },
           el("label", { for: "c-amount" }, "Contribution"),
-          el("input", { id: "c-amount", name: "amount", type: "number", min: "1", step: "any", required: true, inputmode: "decimal", placeholder: "5000" })
+          el("input", { id: "c-amount", name: "amount", type: "number", min: "1", step: "any", required: true, inputmode: "decimal", placeholder: "100" })
         ),
         el("div", { class: "field" },
           el("label", { for: "c-currency" }, "Currency"),
