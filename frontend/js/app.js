@@ -1,11 +1,27 @@
 import { connectSocket } from "./api.js";
-import { getSession, clearSession } from "./session.js";
+import { getSession, clearSession, saveSession } from "./session.js";
 import { startRouter, navigate } from "./router.js";
 import { renderAuth } from "./views/auth.js";
 import { renderDashboard } from "./views/dashboard.js";
 import { renderCircle } from "./views/circle.js";
 
 const root = document.getElementById("app");
+
+// A "test member" window opens with ?demo=<base64 session> so it can act as a
+// throwaway member for a solo live-sync demo. Adopt that session for THIS tab
+// only (sessionStorage), then strip the param so it doesn't linger or get shared.
+(function adoptDemoSession() {
+  try {
+    const raw = new URLSearchParams(location.search).get("demo");
+    if (raw) {
+      const { token, user } = JSON.parse(atob(raw));
+      if (token && user) saveSession(token, user, { perTab: true });
+    }
+  } catch { /* malformed demo param — ignore and load normally */ }
+  if (location.search) {
+    history.replaceState(null, "", location.pathname + location.hash);
+  }
+})();
 
 // One socket for the whole session; views subscribe through this bus
 // and filter events down to whatever circle they're showing.

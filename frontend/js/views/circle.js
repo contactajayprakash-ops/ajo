@@ -200,12 +200,23 @@ export function renderCircle(root, circleId, ctx) {
         el("div", { class: "admin-row" },
           startBtn,
           el("p", { class: "admin-hint" }, !enough
-            ? "Waiting for at least one more member — share the invite code to get started."
+            ? "A circle needs at least two people. Share the invite code with someone (they join on their own account) — or add a test member below to try it solo."
             : full
               ? "All seats are filled. Starting locks the rotation."
               : `${circle.seats - members.length} seat${circle.seats - members.length === 1 ? "" : "s"} still open. You can start early if you want a smaller round.`)
         )
       );
+
+      // Solo demo helper: real members must each use their own account (you
+      // can't fill two seats from one login), so for a quick test we spin up a
+      // throwaway member and open it in a second window — real backend, real
+      // live sync, no second signup.
+      if (!full) {
+        const demoBtn = el("button", { class: "link-btn demo-add", type: "button" }, "＋ Add a test member (opens a second window)");
+        const demoNote = el("p", { class: "admin-hint demo-note" });
+        demoBtn.addEventListener("click", () => addTestMember(demoBtn, demoNote));
+        adminHost.append(el("div", { class: "admin-row demo-row" }, demoBtn, demoNote));
+      }
     } else if (circle.status === "active") {
       const next = upNext();
       const releaseBtn = el("button", { class: "btn btn-quiet btn-release" }, `Release the pot to ${next ? next.name : "…"}`);
@@ -228,6 +239,47 @@ export function renderCircle(root, circleId, ctx) {
       });
       adminHost.append(el("div", { class: "admin-row" }, releaseBtn,
         el("p", { class: "admin-hint" }, "Admin only. Do this once the cycle's contributions are in.")));
+    }
+  }
+
+  async function addTestMember(btn, note) {
+    // Open the window synchronously inside the click so the browser doesn't
+    // treat it as an unrequested pop-up; we point it at the demo URL once the
+    // account exists and has joined.
+    const win = window.open("about:blank", "ajo-demo-" + Date.now(), "width=1040,height=800");
+    btn.disabled = true;
+    const label = btn.textContent;
+    btn.textContent = "Adding…";
+    note.textContent = "";
+    try {
+      const tag = Math.random().toString(36).slice(2, 8);
+      const creds = {
+        name: `Test member ${members.length + 1}`,
+        email: `demo-${tag}-${Date.now().toString(36)}@ajo.test`,
+        password: `demo-${tag}-${Math.random().toString(36).slice(2, 8)}`,
+      };
+      const acct = await call("sign-up", creds);
+      if (!acct || !acct.token) throw new Error("Couldn't create a test member — try once more.");
+      // Join this circle AS the demo member (explicit token, current session untouched).
+      await call("join-circle", { invite_code: circle.invite_code }, { token: acct.token });
+
+      const payload = btoa(JSON.stringify({
+        token: acct.token,
+        user: { id: acct.id, name: acct.name, email: acct.email },
+      }));
+      const url = `${location.origin}${location.pathname}?demo=${payload}#/circle/${circle.id}`;
+      if (win) win.location = url;
+
+      await loadMembers();
+      note.textContent = win
+        ? "A test member joined and opened in a new window. Put the two windows side by side, then pay in from one and watch the pot move on both."
+        : "A test member joined. Allow pop-ups for this site, then click again to open their window.";
+    } catch (err) {
+      if (win) win.close();
+      note.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = label;
     }
   }
 

@@ -696,6 +696,17 @@ a { color: var(--indigo); }
 
 .admin-hint { color: var(--muted); font-size: 0.85rem; margin: 0; max-width: 26rem; }
 
+.demo-row { border-top-style: dotted; padding-top: 0.85rem; }
+.demo-add {
+  font-size: 0.85rem;
+  color: var(--muted);
+  border: 1px dashed var(--line-strong);
+  border-radius: 99px;
+  padding: 0.4rem 0.9rem;
+}
+.demo-add:hover { color: var(--bone); border-color: var(--bone-dim); }
+.demo-note { max-width: 30rem; text-align: center; }
+
 /* rotation + feed columns */
 
 .circle-columns {

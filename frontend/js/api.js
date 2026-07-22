@@ -1,11 +1,13 @@
 import { API_BASE, WS_URL } from "../config.js";
 import { getSession } from "./session.js";
 
-// Every endpoint is POST + JSON, so one wrapper covers the lot.
-export async function call(resource, body = {}) {
+// Every endpoint is POST + JSON, so one wrapper covers the lot. Pass
+// { token } to act as a specific user without switching the current session —
+// used to sign up and join a throwaway "test member" for solo demos.
+export async function call(resource, body = {}, opts = {}) {
   const headers = { "Content-Type": "application/json" };
-  const session = getSession();
-  if (session) headers["x-access-token"] = session.token;
+  const token = opts.token || (getSession() && getSession().token);
+  if (token) headers["x-access-token"] = token;
 
   // A hung request is indistinguishable from a broken one to the person
   // staring at a spinner — cap it and say something useful.
