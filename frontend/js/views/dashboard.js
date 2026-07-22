@@ -2,7 +2,7 @@ import { call, callList } from "../api.js";
 import { el, money } from "../ui.js";
 import { navigate } from "../router.js";
 
-const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD"];
+const CURRENCIES = ["NGN", "GHS", "KES", "ZAR", "XOF", "USD", "EUR", "GBP", "CAD", "AUD", "INR", "JPY"];
 
 function greeting(name) {
   const h = new Date().getHours();
@@ -70,8 +70,16 @@ export function renderDashboard(root, ctx) {
         ),
         el("div", { class: "field" },
           el("label", { for: "c-currency" }, "Currency"),
-          el("select", { id: "c-currency", name: "currency" },
-            CURRENCIES.map((c) => el("option", { value: c }, c)))
+          el("select", { id: "c-currency", name: "currency", onchange: onCurrencyChange },
+            CURRENCIES.map((c) => el("option", { value: c }, c)),
+            el("option", { value: "__custom" }, "Other…")),
+          // Circles run anywhere — any ISO-style code works, and money()
+          // renders unknown codes as "CODE amount" so nothing breaks.
+          el("input", {
+            id: "c-currency-custom", name: "currencyCustom", type: "text", hidden: true,
+            maxlength: "5", autocomplete: "off", spellcheck: "false",
+            placeholder: "e.g. BRL", style: "margin-top:6px;text-transform:uppercase",
+          })
         )
       ),
       el("div", { class: "field-row" },
@@ -91,12 +99,25 @@ export function renderDashboard(root, ctx) {
       el("button", { class: "btn btn-primary", type: "submit" }, "Create circle")
     );
 
+    function onCurrencyChange() {
+      const custom = form.currency.value === "__custom";
+      form.currencyCustom.hidden = !custom;
+      if (custom) form.currencyCustom.focus();
+    }
+
     async function submit(e) {
       e.preventDefault();
       err.textContent = "";
       const btn = form.querySelector("button[type=submit]");
       btn.disabled = true;
       try {
+        let currency = form.currency.value;
+        if (currency === "__custom") {
+          currency = form.currencyCustom.value.trim().toUpperCase();
+          if (!/^[A-Z]{2,5}$/.test(currency)) {
+            throw new Error("Enter a currency code, like BRL or PHP (2–5 letters).");
+          }
+        }
         const amount = Number(form.amount.value);
         const seats = Number(form.seats.value);
         if (!Number.isFinite(amount) || amount <= 0) {
@@ -114,7 +135,7 @@ export function renderDashboard(root, ctx) {
           name: form.name.value.trim(),
           description: form.description.value.trim(),
           contribution_amount: Number(form.amount.value),
-          currency: form.currency.value,
+          currency,
           frequency: form.frequency.value,
           seats: Number(form.seats.value),
         });

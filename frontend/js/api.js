@@ -54,13 +54,17 @@ function friendlyError(resource, status, raw) {
   if (status >= 500) {
     return "The server hit a problem. Give it a second and try again.";
   }
+  // "Operation Failed: this action must return a value!" is Sub0's way of
+  // saying a strict query matched no row (bad invite code, not admin, …) —
+  // engine-speak, not something to show a person.
   const looksTechnical =
-    !msg || msg.length > 140 || /exception|traceback|sql|syntax|undefined|null value|constraint/i.test(msg);
+    !msg || msg.length > 140 ||
+    /exception|traceback|sql|syntax|undefined|null value|constraint|operation failed|must return a value/i.test(msg);
   if (!looksTechnical) return msg;
   const fallback = {
     "sign-in": "Wrong email or password.",
     "sign-up": "Couldn't create the account — that email may already be registered.",
-    "join-circle": "That invite code didn't match any circle. Check it and try again.",
+    "join-circle": "That invite code didn't match any circle — it may be wrong, expired, or the circle already started. Check it and try again.",
     "contribute": "That payment didn't go through — you may have already paid this cycle.",
     "activate-circle": "Couldn't start the circle. Only the admin can start it, and it needs at least 2 members.",
     "trigger-payout": "Couldn't release the pot. Only the admin can do this, once everyone has paid in.",

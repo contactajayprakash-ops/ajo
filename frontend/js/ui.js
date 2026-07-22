@@ -34,12 +34,21 @@ function appendKids(node, kids) {
 }
 
 const CURRENCY_SIGNS = {
+  NGN: "₦",
+  GHS: "GH₵",
+  KES: "KSh ",
+  ZAR: "R",
+  XOF: "CFA ",
   USD: "$",
   EUR: "€",
   GBP: "£",
   CAD: "CA$",
   AUD: "A$",
+  INR: "₹",
+  JPY: "¥",
 };
+// Anything not listed falls back to "CODE amount" in money(), so a circle can
+// run in any currency — the code the admin typed is simply shown as-is.
 
 export function money(amount, currency) {
   const n = Number(amount) || 0;
