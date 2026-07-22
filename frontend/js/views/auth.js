@@ -67,6 +67,10 @@ export function renderAuth(root, { onLogin }) {
       errorLine.textContent = "Tell us your name — your circle will see it.";
       return;
     }
+    if (!email || !email.includes("@")) {
+      errorLine.textContent = "Enter a valid email address.";
+      return;
+    }
     if (password.length < 8) {
       errorLine.textContent = "Password needs at least 8 characters.";
       return;
@@ -77,13 +81,22 @@ export function renderAuth(root, { onLogin }) {
     submitBtn.textContent = mode === "signup" ? "Creating…" : "Signing in…";
     try {
       const res = await call(mode === "signup" ? "sign-up" : "sign-in", body);
+      // The backend can answer 200 with an empty row when credentials don't
+      // match — no token means we are NOT signed in, whatever the status said.
+      if (!res || !res.token) {
+        throw new Error(mode === "signup"
+          ? "Couldn't create the account — that email may already be registered."
+          : "Wrong email or password.");
+      }
       saveSession(res.token, { id: res.id, name: res.name, email: res.email });
       onLogin();
     } catch (err) {
+      // Restore the button by hand. Don't call applyMode() here: it clears the
+      // error line, which is how "wrong password" used to vanish unread.
       errorLine.textContent = err.message;
       busy = false;
       submitBtn.disabled = false;
-      applyMode();
+      submitBtn.textContent = mode === "signup" ? "Create account" : "Sign in";
     }
   }
 

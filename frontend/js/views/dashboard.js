@@ -97,6 +97,14 @@ export function renderDashboard(root, ctx) {
       const btn = form.querySelector("button[type=submit]");
       btn.disabled = true;
       try {
+        const amount = Number(form.amount.value);
+        const seats = Number(form.seats.value);
+        if (!Number.isFinite(amount) || amount <= 0) {
+          throw new Error("Contribution needs to be a positive amount.");
+        }
+        if (!Number.isInteger(seats) || seats < 2 || seats > 50) {
+          throw new Error("Seats must be a whole number between 2 and 50.");
+        }
         // We mint the circle id here so the backend can reuse it across the
         // circle + membership + activity inserts without id round-trips.
         const circle_id = (crypto.randomUUID && crypto.randomUUID()) ||
@@ -138,7 +146,14 @@ export function renderDashboard(root, ctx) {
       const btn = form.querySelector("button[type=submit]");
       btn.disabled = true;
       try {
-        const res = await call("join-circle", { invite_code: form.code.value.trim() });
+        const code = form.code.value.trim().toUpperCase();
+        if (!code) throw new Error("Enter the invite code first.");
+        const res = await call("join-circle", { invite_code: code });
+        // An unknown code can come back as an empty 200 rather than an error —
+        // don't navigate to a circle that isn't there.
+        if (!res || !res.id) {
+          throw new Error("That invite code didn't match any circle. Check it and try again.");
+        }
         navigate(`#/circle/${res.id}`);
       } catch (ex) {
         err.textContent = ex.message;

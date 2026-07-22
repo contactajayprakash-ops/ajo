@@ -191,14 +191,19 @@ export function renderCircle(root, circleId, ctx) {
 
     if (circle.status === "forming") {
       const full = members.length >= circle.seats;
-      const startBtn = el("button", { class: "btn btn-primary", onclick: () => runAdmin(startBtn, "activate-circle", "Starting…") },
+      // A rotation needs at least two people — a circle of one is just a
+      // savings account with extra steps, and payouts would loop on the admin.
+      const enough = members.length >= 2;
+      const startBtn = el("button", { class: "btn btn-primary", disabled: !enough, onclick: () => runAdmin(startBtn, "activate-circle", "Starting…") },
         "Start the circle");
       adminHost.append(
         el("div", { class: "admin-row" },
           startBtn,
-          el("p", { class: "admin-hint" }, full
-            ? "All seats are filled. Starting locks the rotation."
-            : `${circle.seats - members.length} seat${circle.seats - members.length === 1 ? "" : "s"} still open. You can start early if you want a smaller round.`)
+          el("p", { class: "admin-hint" }, !enough
+            ? "Waiting for at least one more member — share the invite code to get started."
+            : full
+              ? "All seats are filled. Starting locks the rotation."
+              : `${circle.seats - members.length} seat${circle.seats - members.length === 1 ? "" : "s"} still open. You can start early if you want a smaller round.`)
         )
       );
     } else if (circle.status === "active") {
@@ -234,7 +239,11 @@ export function renderCircle(root, circleId, ctx) {
     try {
       const res = await call(endpoint, { circle_id: circle.id });
       // The socket echoes this to everyone including us; applying here too keeps
-      // the admin's screen honest even if the socket is mid-reconnect.
+      // the admin's screen honest even if the socket is mid-reconnect. An empty
+      // response means the action matched no row (not admin / already done).
+      if (!res || (res.pot_balance === undefined && res.current_cycle === undefined && res.status === undefined)) {
+        throw new Error("Nothing to do — the pot may already be released, or you're not the admin.");
+      }
       applyState(res, true);
       await loadMembers();
     } catch (err) {
@@ -252,6 +261,11 @@ export function renderCircle(root, circleId, ctx) {
     contributeBtn.textContent = "Paying in…";
     try {
       const res = await call("contribute", { circle_id: circle.id });
+      // Empty response = the insert matched nothing, i.e. already paid this
+      // cycle (the unique-per-cycle rule) or the circle isn't collecting.
+      if (!res || (res.pot_balance === undefined && res.current_cycle === undefined && res.status === undefined)) {
+        throw new Error("That payment didn't go through — you may have already paid this cycle.");
+      }
       applyState(res, true);
       await loadMembers();
     } catch (err) {
