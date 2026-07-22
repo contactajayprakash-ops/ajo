@@ -155,7 +155,7 @@ export function renderDashboard(root, ctx) {
       el("p", { class: "panel-hint" }, "Ask the person who started it for the invite code."),
       el("div", { class: "field" },
         el("label", { for: "j-code" }, "Invite code"),
-        el("input", { id: "j-code", name: "code", required: true, class: "input-code", autocomplete: "off", spellcheck: "false", placeholder: "e.g. K7Q2XV" })
+        el("input", { id: "j-code", name: "code", required: true, class: "input-code", autocomplete: "off", autocapitalize: "off", spellcheck: "false", placeholder: "Paste the code exactly" })
       ),
       err,
       el("button", { class: "btn btn-primary", type: "submit" }, "Join")
@@ -167,7 +167,10 @@ export function renderDashboard(root, ctx) {
       const btn = form.querySelector("button[type=submit]");
       btn.disabled = true;
       try {
-        const code = form.code.value.trim().toUpperCase();
+        // Invite codes are case-sensitive (Sub0 generates mixed-case ids like
+        // "fPpouyuMM2ZHjLFp9LKb6s"), so only trim — never change the case, or
+        // a valid pasted code stops matching.
+        const code = form.code.value.trim();
         if (!code) throw new Error("Enter the invite code first.");
         const res = await call("join-circle", { invite_code: code });
         // An unknown code can come back as an empty 200 rather than an error —

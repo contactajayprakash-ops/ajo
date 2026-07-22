@@ -217,7 +217,8 @@ a { color: var(--indigo); }
 .input-code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   letter-spacing: 0.18em;
-  text-transform: uppercase;
+  /* Invite codes are case-sensitive — don't visually force uppercase, or the
+     field misrepresents the mixed-case code the person actually typed. */
 }
 
 .form-error {
