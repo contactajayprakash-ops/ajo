@@ -1,9 +1,9 @@
-import { connectSocket } from "./api.js";
-import { getSession, clearSession, saveSession } from "./session.js";
-import { startRouter, navigate } from "./router.js";
-import { renderAuth } from "./views/auth.js";
-import { renderDashboard } from "./views/dashboard.js";
-import { renderCircle } from "./views/circle.js";
+import { connectSocket } from "./api.js?v=180005ccb8";
+import { getSession, clearSession, saveSession } from "./session.js?v=180005ccb8";
+import { startRouter, navigate } from "./router.js?v=180005ccb8";
+import { renderAuth } from "./views/auth.js?v=180005ccb8";
+import { renderDashboard } from "./views/dashboard.js?v=180005ccb8";
+import { renderCircle } from "./views/circle.js?v=180005ccb8";
 
 const root = document.getElementById("app");
 

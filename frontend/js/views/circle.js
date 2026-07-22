@@ -1,5 +1,5 @@
-import { call, callList } from "../api.js";
-import { el, money, timeAgo, countUp, pulse } from "../ui.js";
+import { call, callList } from "../api.js?v=180005ccb8";
+import { el, money, timeAgo, countUp, pulse } from "../ui.js?v=180005ccb8";
 
 const FEED_LIMIT = 40;
 
