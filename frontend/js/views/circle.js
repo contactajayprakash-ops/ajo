@@ -1,5 +1,5 @@
-import { call, callList } from "../api.js?v=180005ccb8";
-import { el, money, timeAgo, countUp, pulse } from "../ui.js?v=180005ccb8";
+import { call, callList } from "../api.js?v=6ed7b4b51b";
+import { el, money, timeAgo, countUp, pulse } from "../ui.js?v=6ed7b4b51b";
 
 const FEED_LIMIT = 40;
 
@@ -252,11 +252,13 @@ export function renderCircle(root, circleId, ctx) {
     btn.textContent = "Adding…";
     note.textContent = "";
     try {
-      const tag = Math.random().toString(36).slice(2, 8);
+      // Keep the local part plain alphanumeric on a normal .com domain — Sub0's
+      // email validator rejects reserved TLDs like .test.
+      const tag = (Date.now().toString(36) + Math.random().toString(36).slice(2, 8)).replace(/[^a-z0-9]/g, "");
       const creds = {
         name: `Test member ${members.length + 1}`,
-        email: `demo-${tag}-${Date.now().toString(36)}@ajo.test`,
-        password: `demo-${tag}-${Math.random().toString(36).slice(2, 8)}`,
+        email: `ajo.demo.${tag}@example.com`,
+        password: `demo${tag}${Math.random().toString(36).slice(2, 8)}`,
       };
       const acct = await call("sign-up", creds);
       if (!acct || !acct.token) throw new Error("Couldn't create a test member — try once more.");
