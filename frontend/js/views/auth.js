@@ -1,6 +1,6 @@
-import { call } from "../api.js?v=6ed7b4b51b";
-import { saveSession } from "../session.js?v=6ed7b4b51b";
-import { el } from "../ui.js?v=6ed7b4b51b";
+import { call } from "../api.js?v=06ab41abf4";
+import { saveSession } from "../session.js?v=06ab41abf4";
+import { el } from "../ui.js?v=06ab41abf4";
 
 export function renderAuth(root, { onLogin }) {
   let mode = "signin";

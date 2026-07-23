@@ -1,5 +1,5 @@
-import { call, callList } from "../api.js?v=6ed7b4b51b";
-import { el, money, timeAgo, countUp, pulse } from "../ui.js?v=6ed7b4b51b";
+import { call, callList } from "../api.js?v=06ab41abf4";
+import { el, money, timeAgo, countUp, pulse } from "../ui.js?v=06ab41abf4";
 
 const FEED_LIMIT = 40;
 
@@ -219,7 +219,14 @@ export function renderCircle(root, circleId, ctx) {
       }
     } else if (circle.status === "active") {
       const next = upNext();
-      const releaseBtn = el("button", { class: "btn btn-quiet btn-release" }, `Release the pot to ${next ? next.name : "…"}`);
+      // The pot can only be released once everyone has paid into this cycle;
+      // gate the button on that so the admin isn't clicking into a failure.
+      const unpaid = members.filter((m) => !m.paid_this_cycle).length;
+      const allIn = unpaid === 0;
+      const releaseBtn = el("button", {
+        class: "btn btn-quiet btn-release",
+        disabled: !allIn,
+      }, `Release the pot to ${next ? next.name : "…"}`);
       let armed = false;
       let disarmTimer = null;
       releaseBtn.addEventListener("click", () => {
@@ -238,7 +245,9 @@ export function renderCircle(root, circleId, ctx) {
         runAdmin(releaseBtn, "trigger-payout", "Releasing…");
       });
       adminHost.append(el("div", { class: "admin-row" }, releaseBtn,
-        el("p", { class: "admin-hint" }, "Admin only. Do this once the cycle's contributions are in.")));
+        el("p", { class: "admin-hint" }, allIn
+          ? "Everyone's paid in — release the pot to send it to whoever's up next."
+          : `Waiting on ${unpaid} member${unpaid === 1 ? "" : "s"} to pay in before you can release the pot.`)));
     }
   }
 
@@ -294,9 +303,16 @@ export function renderCircle(root, circleId, ctx) {
       const res = await call(endpoint, { circle_id: circle.id });
       // The socket echoes this to everyone including us; applying here too keeps
       // the admin's screen honest even if the socket is mid-reconnect. An empty
-      // response means the action matched no row (not admin / already done).
+      // response means the action matched no row — name the likely reason per
+      // action instead of a vague catch-all.
       if (!res || (res.pot_balance === undefined && res.current_cycle === undefined && res.status === undefined)) {
-        throw new Error("Nothing to do — the pot may already be released, or you're not the admin.");
+        if (endpoint === "trigger-payout") {
+          const unpaid = members.filter((m) => !m.paid_this_cycle).length;
+          throw new Error(unpaid > 0
+            ? `Everyone needs to pay in first — still waiting on ${unpaid} member${unpaid === 1 ? "" : "s"}.`
+            : "The pot's already been released for this cycle.");
+        }
+        throw new Error("That didn't go through — you may not be the admin, or it's already done.");
       }
       applyState(res, true);
       await loadMembers();
