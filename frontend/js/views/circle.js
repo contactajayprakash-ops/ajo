@@ -1,5 +1,5 @@
-import { call, callList } from "../api.js?v=06ab41abf4";
-import { el, money, timeAgo, countUp, pulse } from "../ui.js?v=06ab41abf4";
+import { call, callList } from "../api.js?v=4d0fdaeda5";
+import { el, money, timeAgo, countUp, pulse } from "../ui.js?v=4d0fdaeda5";
 
 const FEED_LIMIT = 40;
 
@@ -470,7 +470,23 @@ export function renderCircle(root, circleId, ctx) {
 
   // --- websocket events (already connected app-wide; filter to this circle) ---
 
+  // Re-fetch the whole state from scratch. WebSocket delivery is best-effort —
+  // if the socket blips (sleep, network, reconnect) a client can miss a
+  // broadcast and get stuck showing stale numbers. Calling this on every socket
+  // (re)open, and on a slow poll, means a client always heals itself.
+  async function resync() {
+    if (destroyed || !circle) return;
+    try {
+      const fresh = await call("circle-details", { circle_id: circleId });
+      if (destroyed) return;
+      applyState(fresh, true);
+      await Promise.all([loadMembers(), loadFeed()]);
+    } catch { /* transient — the next poll or event will catch up */ }
+  }
+
   const unsub = bus.on((action, data) => {
+    // Fired by the app whenever the shared socket (re)connects — heal any gap.
+    if (action === "__socket_open__") { resync(); return; }
     if (!data || String(data.circle_id) !== String(circleId)) return;
     switch (action) {
       case "contribution_made":
@@ -533,11 +549,17 @@ export function renderCircle(root, circleId, ctx) {
 
   load();
 
+  // Backstop poll: even if every socket event were missed, the screen is never
+  // more than ~15s stale. Cheap for a savings circle, and it makes the live
+  // demo reliable regardless of socket hiccups.
+  const pollTimer = setInterval(resync, 15000);
+
   return {
     destroy() {
       destroyed = true;
       unsub();
       clearInterval(clockTimer);
+      clearInterval(pollTimer);
     },
   };
 }

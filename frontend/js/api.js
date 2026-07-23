@@ -1,5 +1,5 @@
-import { API_BASE, WS_URL } from "../config.js?v=06ab41abf4";
-import { getSession } from "./session.js?v=06ab41abf4";
+import { API_BASE, WS_URL } from "../config.js?v=4d0fdaeda5";
+import { getSession } from "./session.js?v=4d0fdaeda5";
 
 // Every endpoint is POST + JSON, so one wrapper covers the lot. Pass
 // { token } to act as a specific user without switching the current session —
@@ -107,7 +107,7 @@ export async function callList(resource, body = {}) {
 
 // Opens the socket and keeps it open. Reconnects with backoff, capped at 15s.
 // Returns { close } — call it when the user signs out.
-export function connectSocket(uid, onEvent) {
+export function connectSocket(uid, onEvent, onOpen) {
   let ws = null;
   let attempts = 0;
   let stopped = false;
@@ -118,6 +118,9 @@ export function connectSocket(uid, onEvent) {
 
     ws.onopen = () => {
       attempts = 0;
+      // Signal every (re)connect so views can re-sync and heal any gap where a
+      // broadcast was missed while the socket was down.
+      if (onOpen) onOpen();
     };
 
     ws.onmessage = (ev) => {

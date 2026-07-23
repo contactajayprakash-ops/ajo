@@ -1,6 +1,6 @@
-import { call, callList } from "../api.js?v=06ab41abf4";
-import { el, money } from "../ui.js?v=06ab41abf4";
-import { navigate } from "../router.js?v=06ab41abf4";
+import { call, callList } from "../api.js?v=4d0fdaeda5";
+import { el, money } from "../ui.js?v=4d0fdaeda5";
+import { navigate } from "../router.js?v=4d0fdaeda5";
 
 const CURRENCIES = ["NGN", "GHS", "KES", "ZAR", "XOF", "USD", "EUR", "GBP", "CAD", "AUD", "INR", "JPY"];
 

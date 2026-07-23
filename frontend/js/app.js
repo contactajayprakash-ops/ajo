@@ -1,9 +1,9 @@
-import { connectSocket } from "./api.js?v=06ab41abf4";
-import { getSession, clearSession, saveSession } from "./session.js?v=06ab41abf4";
-import { startRouter, navigate } from "./router.js?v=06ab41abf4";
-import { renderAuth } from "./views/auth.js?v=06ab41abf4";
-import { renderDashboard } from "./views/dashboard.js?v=06ab41abf4";
-import { renderCircle } from "./views/circle.js?v=06ab41abf4";
+import { connectSocket } from "./api.js?v=4d0fdaeda5";
+import { getSession, clearSession, saveSession } from "./session.js?v=4d0fdaeda5";
+import { startRouter, navigate } from "./router.js?v=4d0fdaeda5";
+import { renderAuth } from "./views/auth.js?v=4d0fdaeda5";
+import { renderDashboard } from "./views/dashboard.js?v=4d0fdaeda5";
+import { renderCircle } from "./views/circle.js?v=4d0fdaeda5";
 
 const root = document.getElementById("app");
 
@@ -41,7 +41,7 @@ let socket = null;
 function ensureSocket(uid) {
   if (socket && socket.uid === uid) return;
   if (socket) socket.conn.close();
-  socket = { uid, conn: connectSocket(uid, bus.emit) };
+  socket = { uid, conn: connectSocket(uid, bus.emit, () => bus.emit("__socket_open__", {})) };
 }
 
 function dropSocket() {
